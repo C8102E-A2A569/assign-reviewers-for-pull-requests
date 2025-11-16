@@ -121,7 +121,7 @@ func makeRequest(method, path string, body interface{}) (int, time.Duration, err
 	}
 	defer resp.Body.Close()
 	
-	io.ReadAll(resp.Body) // Read and discard body
+	io.ReadAll(resp.Body) 
 	
 	return resp.StatusCode, duration, nil
 }
@@ -129,7 +129,6 @@ func makeRequest(method, path string, body interface{}) (int, time.Duration, err
 func setupTestData() error {
 	fmt.Println("Setting up test data...")
 	
-	// Create teams
 	for i := 1; i <= numTeams; i++ {
 		teamName := fmt.Sprintf("team-%d", i)
 		members := make([]map[string]interface{}, usersPerTeam)
@@ -165,7 +164,6 @@ func runLoadTest(stats *Stats, stopCh <-chan struct{}, workerID int) {
 		case <-stopCh:
 			return
 		default:
-			// Randomly choose an operation
 			operation := prCounter % 10
 			prCounter++
 			
@@ -174,10 +172,9 @@ func runLoadTest(stats *Stats, stopCh <-chan struct{}, workerID int) {
 			var err error
 			
 			switch operation {
-			case 0, 1, 2, 3, 4, 5: // Create PR (60%)
+			case 0, 1, 2, 3, 4, 5: 
 				teamID := (prCounter % numTeams) + 1
 				userID := ((prCounter / numTeams) % usersPerTeam) + 1
-				// Use timestamp + worker ID + counter for unique PR IDs
 				body := map[string]interface{}{
 					"pull_request_id":   fmt.Sprintf("pr-%d-w%d-c%d", time.Now().UnixNano()/1000, workerID, prCounter),
 					"pull_request_name": fmt.Sprintf("PR %d from worker %d", prCounter, workerID),
@@ -185,13 +182,13 @@ func runLoadTest(stats *Stats, stopCh <-chan struct{}, workerID int) {
 				}
 				status, duration, err = makeRequest("POST", "/pullRequest/create", body)
 				
-			case 6, 7: // Get user reviews (20%)
+			case 6, 7: 
 				teamID := (prCounter % numTeams) + 1
 				userID := ((prCounter / numTeams) % usersPerTeam) + 1
 				path := fmt.Sprintf("/users/getReview?user_id=u%d-%d", teamID, userID)
 				status, duration, err = makeRequest("GET", path, nil)
 				
-			case 8, 9: // Get team (20%)
+			case 8, 9: 
 				teamID := (prCounter % numTeams) + 1
 				path := fmt.Sprintf("/team/get?team_name=team-%d", teamID)
 				status, duration, err = makeRequest("GET", path, nil)
@@ -204,7 +201,6 @@ func runLoadTest(stats *Stats, stopCh <-chan struct{}, workerID int) {
 }
 
 func main() {
-	// Check if service is available
 	resp, err := http.Get(baseURL + "/health")
 	if err != nil {
 		fmt.Printf("Service is not available at %s: %v\n", baseURL, err)
@@ -219,7 +215,6 @@ func main() {
 	
 	fmt.Println("Service is available, starting load test...")
 	
-	// Setup test data
 	if err := setupTestData(); err != nil {
 		fmt.Printf("Failed to setup test data: %v\n", err)
 		return
@@ -229,7 +224,6 @@ func main() {
 	var wg sync.WaitGroup
 	stopCh := make(chan struct{})
 	
-	// Start workers
 	fmt.Printf("\nStarting load test with %d concurrent workers for %v...\n", concurrency, testDuration)
 	
 	for i := 0; i < concurrency; i++ {
@@ -241,7 +235,6 @@ func main() {
 		}(workerID)
 	}
 	
-	// Print progress
 	ticker := time.NewTicker(5 * time.Second)
 	go func() {
 		for range ticker.C {
@@ -251,15 +244,13 @@ func main() {
 		}
 	}()
 	
-	// Run for specified duration
 	time.Sleep(testDuration)
 	close(stopCh)
 	ticker.Stop()
 	
 	wg.Wait()
 	stats.print()
-	
-	// Verify SLI requirements
+
 	fmt.Printf("\n=== SLI Requirements Check ===\n")
 	
 	avgLatency := float64(atomic.LoadInt64(&stats.totalLatency)) / float64(atomic.LoadInt64(&stats.totalRequests))
