@@ -30,7 +30,28 @@ type LogConfig struct {
 }
 
 func Load() (*Config, error) {
-	dbPort, err := strconv.Atoi(getEnv("DB_PORT", "5432"))
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		return nil, fmt.Errorf("DB_HOST environment variable is required")
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	if dbUser == "" {
+		return nil, fmt.Errorf("DB_USER environment variable is required")
+	}
+
+	dbPassword := os.Getenv("DB_PASSWORD")
+	if dbPassword == "" {
+		return nil, fmt.Errorf("DB_PASSWORD environment variable is required")
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		return nil, fmt.Errorf("DB_NAME environment variable is required")
+	}
+
+	dbPortStr := getEnv("DB_PORT", "5432")
+	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid DB_PORT: %w", err)
 	}
@@ -40,11 +61,11 @@ func Load() (*Config, error) {
 			Port: getEnv("SERVER_PORT", "8080"),
 		},
 		Database: DatabaseConfig{
-			Host:     getEnv("DB_HOST", "localhost"),
+			Host:     dbHost,
 			Port:     dbPort,
-			User:     getEnv("DB_USER", "postgres"),
-			Password: getEnv("DB_PASSWORD", "postgres"),
-			DBName:   getEnv("DB_NAME", "postgres"),
+			User:     dbUser,
+			Password: dbPassword,
+			DBName:   dbName,
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		Log: LogConfig{
