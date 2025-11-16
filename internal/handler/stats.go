@@ -11,7 +11,6 @@ func (h *Handler) getStats(c *gin.Context) {
 	statsType := c.Query("type")
 
 	if statsType == "" {
-		// Return general stats
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 		})

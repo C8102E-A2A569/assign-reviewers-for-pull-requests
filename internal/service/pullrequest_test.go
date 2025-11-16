@@ -203,7 +203,6 @@ func TestCreatePR_DuplicateID(t *testing.T) {
 		t.Fatalf("Failed to create first PR: %v", err)
 	}
 
-	// Try to create duplicate
 	_, err = service.CreatePR(req)
 	if err == nil {
 		t.Error("Expected error when creating duplicate PR")

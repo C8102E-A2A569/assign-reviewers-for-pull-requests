@@ -14,7 +14,6 @@ type UserRepository interface {
 	GetActiveByTeamID(teamID string, excludeIDs []string) ([]model.User, error)
 	SetIsActive(userID string, isActive bool) error
 	
-	// Get user internal ID by user_id
 	GetIDByUserID(userID string) (string, error)
 }
 

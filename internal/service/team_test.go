@@ -65,7 +65,6 @@ func TestCreateTeam_Duplicate(t *testing.T) {
 		t.Fatalf("Failed to create first team: %v", err)
 	}
 
-	// Try to create duplicate
 	_, err = service.CreateTeam(team)
 	if err == nil {
 		t.Error("Expected error when creating duplicate team")
@@ -96,7 +95,6 @@ func TestGetTeam_Success(t *testing.T) {
 		t.Fatalf("Failed to create team: %v", err)
 	}
 
-	// Get team
 	retrievedTeam, err := service.GetTeam("backend")
 	if err != nil {
 		t.Fatalf("Failed to get team: %v", err)
